@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Webinar Audience Console · Demo</title>
+<meta name="description" content="Minute-by-minute webinar audience and drop-off console. A demo with synthetic data, built by Nikhil Veerwani.">
+<meta property="og:title" content="Webinar Audience Console · Demo">
+<meta property="og:description" content="Who stays, and when they leave: minute-by-minute webinar retention, refreshed daily by a scheduled pipeline. Synthetic data.">
+<meta property="og:image" content="https://nikhilveerwani.github.io/webinar-audience-console/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F3864'/%3E%3Cpath d='M12 20 C24 20 26 44 52 44' stroke='%23fff' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F4F5F2; --sheet:#FFFFFF; --ink:#13201B; --ink-2:#4A5650; --ink-3:#7A847F; --line:#DFE3DE;
+  --accent:#2F4BD8; --amber:#B7791F; --amber-soft:#FBF1DD; --good:#2B8A3E; --warn:#C2410C;
+  --f-display:"Bricolage Grotesque",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+  --s1:#2F4BD8; --s2:#E8590C; --s3:#2B8A3E; --s4:#AE3EC9; --s5:#0B7285; --s6:#B7791F;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0F1513; --sheet:#161E1B; --ink:#E8ECEA; --ink-2:#B3BCB7; --ink-3:#86908B; --line:#2A3430;
+  --accent:#8DA2FF; --amber:#E9B44C; --amber-soft:#2E2412; --good:#69DB7C; --warn:#FF8A4C;
+  --s1:#8DA2FF; --s2:#FF8A4C; --s3:#69DB7C; --s4:#DA77F2; --s5:#3BC9DB; --s6:#E9B44C;
+}}
+:root[data-theme="dark"]{
+  --paper:#0F1513; --sheet:#161E1B; --ink:#E8ECEA; --ink-2:#B3BCB7; --ink-3:#86908B; --line:#2A3430;
+  --accent:#8DA2FF; --amber:#E9B44C; --amber-soft:#2E2412; --good:#69DB7C; --warn:#FF8A4C;
+  --s1:#8DA2FF; --s2:#FF8A4C; --s3:#69DB7C; --s4:#DA77F2; --s5:#3BC9DB; --s6:#E9B44C;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 15px/1.55 var(--f-body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+a{color:var(--accent)}
+.demo{background:var(--amber-soft);color:var(--ink);border-bottom:1px solid color-mix(in srgb,var(--amber) 40%,transparent);font-size:13.5px}
+.demo .wrap{display:flex;gap:10px;align-items:center;padding-top:9px;padding-bottom:9px}
+.demo b{color:var(--amber);font-family:var(--f-mono);font-weight:500;font-size:12px;letter-spacing:.06em;text-transform:uppercase;border:1px solid currentColor;border-radius:4px;padding:1px 6px;flex:none}
+header.top{padding:40px 0 22px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,4.6vw,48px);line-height:1.05;letter-spacing:-.02em;margin:8px 0 10px}
+.lede{color:var(--ink-2);max-width:68ch;margin:0}
+.meta{margin-top:14px;font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:6px 18px}
+.controls{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;padding:14px 0 18px;border-top:1px solid var(--line)}
+.ctl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--sheet)}
+.seg button{font:500 13px var(--f-body);border:0;background:transparent;color:var(--ink-2);padding:7px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi small{display:block;font-size:12px;color:var(--ink-3);line-height:1.3;min-height:2.6em}
+.kpi b{display:block;font-family:var(--f-display);font-weight:800;font-size:28px;line-height:1.1;margin-top:6px;letter-spacing:-.01em}
+.kpi span{font-size:12px;color:var(--ink-3)}
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:18px 18px 14px;margin-bottom:18px}
+.card h2{font-family:var(--f-display);font-weight:600;font-size:20px;margin:0 0 4px;letter-spacing:-.01em}
+.card .sub{color:var(--ink-3);font-size:13px;margin:0 0 12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{font:500 12.5px var(--f-body);border:1px solid var(--line);background:transparent;color:var(--ink-2);border-radius:999px;padding:5px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip i{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.chip[aria-pressed="true"]{border-color:var(--ink-2);color:var(--ink)}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+.chart{position:relative;height:340px}
+.chart.short{height:260px}
+.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:600;color:var(--ink-3);font-size:12px;cursor:pointer;user-select:none;position:sticky;top:0;background:var(--sheet)}
+th:nth-child(-n+3),td:nth-child(-n+3){text-align:left}
+th[aria-sort]::after{content:" ↓";color:var(--accent)}
+th[aria-sort="ascending"]::after{content:" ↑"}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+tbody tr.on td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+td.num{font-family:var(--f-mono);font-size:12.5px}
+.pill{font-size:11.5px;border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--ink-2)}
+.bar{display:inline-block;height:6px;border-radius:3px;background:var(--accent);vertical-align:middle;margin-left:6px;opacity:.75}
+tfoot td{font-weight:600;border-top:2px solid var(--line)}
+.how{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+.how ol,.how ul{margin:0;padding-left:18px;color:var(--ink-2)}
+.how li{margin-bottom:7px}
+.how code{font-family:var(--f-mono);font-size:12.5px;background:color-mix(in srgb,var(--ink) 7%,transparent);padding:1px 5px;border-radius:4px}
+.flow{width:100%;height:auto;display:block;margin:6px 0 10px}
+.flow rect{fill:var(--paper);stroke:var(--line)}
+.flow .hi{fill:color-mix(in srgb,var(--accent) 10%,var(--sheet));stroke:var(--accent)}
+.flow text{fill:var(--ink);font:500 12px var(--f-body)}
+.flow .s{fill:var(--ink-3);font:400 10.5px var(--f-mono)}
+.flow path{stroke:var(--ink-3);fill:none;stroke-width:1.4;marker-end:url(#arr)}
+.checks{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.checks div{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.checks b{display:block;font-family:var(--f-mono);font-size:18px}
+.checks span{font-size:12px;color:var(--ink-3)}
+footer{color:var(--ink-3);font-size:13px;padding:22px 0 40px;display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:space-between}
+@media (max-width:980px){.kpis{grid-template-columns:repeat(3,1fr)}.grid2,.how{grid-template-columns:1fr}}
+@media (max-width:560px){.wrap{padding:0 16px}.kpis{grid-template-columns:repeat(2,1fr)}.chart{height:280px}.kpi b{font-size:24px}}
+</style>
+</head>
+<body>
+
+<div class="demo" role="note"><div class="wrap"><b>Demo</b><span>Built on <strong>synthetic data</strong>. The production version of this console runs on company data I can't share, so every webinar, count and name here is made up.</span></div></div>
+
+<header class="top"><div class="wrap">
+  <div class="eyebrow">Webinar analytics · audience console</div>
+  <h1>Who stays, and when they leave</h1>
+  <p class="lede">Minute-by-minute audience for every webinar: when the room peaks, how many are still there 15, 30 and 45 minutes in, and whether qualified attendees behave differently. A scheduled pipeline rebuilds it every morning from raw join/leave events.</p>
+  <div class="meta"><span id="m-refreshed"></span><span id="m-window"></span><span id="m-rows"></span></div>
+</div></header>
+
+<main class="wrap">
+  <div class="controls">
+    <div class="ctl">Type
+      <div class="seg" id="f-type"><button data-v="all" aria-pressed="true">All</button><button data-v="Regular" aria-pressed="false">Regular</button><button data-v="Masterclass" aria-pressed="false">Masterclass</button></div>
+    </div>
+    <div class="ctl">Audience
+      <div class="seg" id="f-seg"><button data-v="all" aria-pressed="true">Everyone</button><button data-v="Qualified" aria-pressed="false">Qualified</button><button data-v="Other" aria-pressed="false">Other</button></div>
+    </div>
+    <div class="ctl">Window
+      <div class="seg" id="f-days"><button data-v="14" aria-pressed="false">14 days</button><button data-v="30" aria-pressed="true">30 days</button><button data-v="45" aria-pressed="false">45 days</button></div>
+    </div>
+  </div>
+
+  <section class="kpis" id="kpis" aria-label="Key metrics"></section>
+
+  <section class="card">
+    <h2>Minute by minute</h2>
+    <p class="sub">People in the room for each selected webinar. Minute 0 is the scheduled start; the room opens 30 minutes earlier. Pick up to 6 webinars below, or click rows in the table.</p>
+    <div class="chips" id="chips"></div>
+    <div class="chart"><canvas id="c-curve" aria-label="Audience per minute"></canvas></div>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Day on day</h2>
+      <p class="sub">Unique attendees per day, split by audience.</p>
+      <div class="chart short"><canvas id="c-daily" aria-label="Unique attendees per day"></canvas></div>
+    </section>
+    <section class="card">
+      <h2>Where the room thins out</h2>
+      <p class="sub">Average share of peak still in the room, Qualified vs Other.</p>
+      <div class="chart short"><canvas id="c-ret" aria-label="Retention by audience"></canvas></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Every webinar</h2>
+    <p class="sub">Click a column to sort, click a row to add it to the chart. +15 / +30 / +45 are the share of peak still in the room.</p>
+    <div class="tablewrap"><table id="tbl">
+      <thead><tr>
+        <th data-k="date">Date</th><th data-k="title">Webinar</th><th data-k="type">Type</th>
+        <th data-k="uniq">Unique</th><th data-k="peak">Peak</th><th data-k="pm">Peak at</th>
+        <th data-k="r15">+15</th><th data-k="r30">+30</th><th data-k="r45">+45</th><th data-k="watch">Avg watch</th>
+      </tr></thead>
+      <tbody></tbody><tfoot></tfoot>
+    </table></div>
+  </section>
+
+  <section class="card how" id="how">
+    <div>
+      <h2>How it's built</h2>
+      <svg class="flow" viewBox="0 0 616 150" role="img" aria-label="Pipeline: raw join and leave events, then the transform, then a data file, then this static page, rebuilt daily by GitHub Actions">
+        <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--ink-3);stroke:none"/></marker></defs>
+        <rect x="2" y="34" width="132" height="62" rx="8"/><text x="14" y="58">Raw events</text><text class="s" x="14" y="76">join / leave rows</text><text class="s" x="14" y="89">UTC, rejoins</text>
+        <rect class="hi" x="160" y="34" width="140" height="62" rx="8"/><text x="172" y="58">Transform</text><text class="s" x="172" y="76">merge sessions</text><text class="s" x="172" y="89">minute grid, peak</text>
+        <rect x="326" y="34" width="126" height="62" rx="8"/><text x="338" y="58">data.js</text><text class="s" x="338" y="76">one small file</text><text class="s" x="338" y="89">~60 KB</text>
+        <rect x="478" y="34" width="136" height="62" rx="8"/><text x="490" y="58">This page</text><text class="s" x="490" y="76">static, no server</text><text class="s" x="490" y="89">GitHub Pages</text>
+        <path d="M134 65 H156"/><path d="M300 65 H322"/><path d="M452 65 H474"/>
+        <rect x="160" y="114" width="292" height="30" rx="8"/><text class="s" x="172" y="133">GitHub Actions · tests, then rebuild daily 10:00 IST</text>
+      </svg>
+      <ol>
+        <li><b>Minute 0 is the scheduled start</b>, not when the room opened. Comparing webinars only works on the same clock.</li>
+        <li><b>Each person counts once per minute.</b> Join/leave rows are merged per attendee first, so a dropped connection or a second device never inflates the count.</li>
+        <li><b>Retention = people in the room at +N minutes ÷ peak.</b> Peak is measured from minute 0, so early arrivals waiting in the lobby don't set it.</li>
+        <li><b>Timestamps arrive in UTC</b> and are converted to IST once, in the transform, never in the page.</li>
+      </ol>
+    </div>
+    <div>
+      <h2>Data checks</h2>
+      <p class="sub">Reconciled on every run, before anything is published.</p>
+      <div class="checks" id="checks"></div>
+      <p class="sub" style="margin-top:14px">Code, tests and the SQL version of the transform: <a href="https://github.com/nikhilveerwani/webinar-audience-console">github.com/nikhilveerwani/webinar-audience-console</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <span>Built by <a href="https://nikhilveerwani.github.io/">Nikhil Veerwani</a> · analytics, BI &amp; growth</span>
+  <span>Synthetic data · no company data or code</span>
+</footer>
+
+<script src="data.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(function(){
+  var D = window.CONSOLE_DATA, css = getComputedStyle(document.documentElement);
+  Chart.defaults.font.family = '"IBM Plex Sans", system-ui, sans-serif';
+  var v = function(n){ return css.getPropertyValue(n).trim(); };
+  var COLORS = ['--s1','--s2','--s3','--s4','--s5','--s6'];
+  var state = { type:'all', seg:'all', days:30, picked:[], sortK:'date', sortDir:-1 };
+  var charts = {};
+  var fmt = function(n){ return n == null ? '–' : Math.round(n).toLocaleString('en-IN'); };
+  var pct = function(n){ return n == null ? '–' : n.toFixed(0) + '%'; };
+  var dshort = function(d){ var p = d.split('-'); return p[2] + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+p[1]-1]; };
+
+  document.getElementById('m-refreshed').textContent = 'Refreshed ' + D.generated_at;
+  document.getElementById('m-rows').textContent = D.checks.raw_rows.toLocaleString('en-IN') + ' raw rows → ' + D.checks.attendees.toLocaleString('en-IN') + ' attendees';
+
+  var last = D.webinars.length ? D.webinars[D.webinars.length-1].date : null;
+  function inWindow(w){
+    var cut = new Date(last); cut.setDate(cut.getDate() - state.days + 1);
+    return new Date(w.date) >= cut && (state.type === 'all' || w.type === state.type);
+  }
+  function S(w){ return state.seg === 'all' ? w.all : w[state.seg]; }
+  function uniq(w){ return state.seg === 'all' ? w.uniques.Qualified + w.uniques.Other : w.uniques[state.seg]; }
+  function curve(w){
+    var q = w.curve.Qualified, o = w.curve.Other;
+    return state.seg === 'all' ? q.map(function(x,i){ return x + o[i]; }) : w.curve[state.seg];
+  }
+  function avg(a){ a = a.filter(function(x){ return x != null; }); return a.length ? a.reduce(function(s,x){ return s+x; },0)/a.length : null; }
+
+  function rows(){ return D.webinars.filter(inWindow); }
+
+  function renderKpis(R){
+    var q = R.reduce(function(s,w){ return s + w.uniques.Qualified; },0), all = R.reduce(function(s,w){ return s + w.uniques.Qualified + w.uniques.Other; },0);
+    var k = [
+      ['Webinars', R.length, dshort(R.length ? R[0].date : last) + ' – ' + dshort(last)],
+      ['Avg unique attendees', fmt(avg(R.map(uniq))), 'per webinar'],
+      ['Avg peak in the room', fmt(avg(R.map(function(w){ return S(w).peak; }))), 'peak around minute ' + fmt(avg(R.map(function(w){ return S(w).peak_minute; })))],
+      ['Still in the room at +15', pct(avg(R.map(function(w){ return S(w).retention['15']; }))), 'share of peak'],
+      ['Still in the room at +45', pct(avg(R.map(function(w){ return S(w).retention['45']; }))), 'share of peak'],
+      ['Qualified share', all ? (100*q/all).toFixed(0) + '%' : '–', 'of unique attendees']
+    ];
+    document.getElementById('kpis').innerHTML = k.map(function(x){ return '<div class="kpi"><small>'+x[0]+'</small><b>'+x[1]+'</b><span>'+x[2]+'</span></div>'; }).join('');
+  }
+
+  function renderChips(R){
+    state.picked = state.picked.filter(function(id){ return R.some(function(w){ return w.id === id; }); });
+    if (!state.picked.length) state.picked = R.slice(-4).map(function(w){ return w.id; });
+    var recent = R.slice(-12).reverse();
+    state.picked.forEach(function(id){ if (!recent.some(function(w){ return w.id === id; })) recent.push(R.find(function(w){ return w.id === id; })); });
+    document.getElementById('chips').innerHTML = recent.map(function(w){
+      var i = state.picked.indexOf(w.id), on = i >= 0;
+      return '<button class="chip" data-id="'+w.id+'" aria-pressed="'+on+'"'+(!on && state.picked.length>=6 ? ' disabled' : '')+'><i style="background:'+(on ? v(COLORS[i]) : '')+'"></i>'+dshort(w.date)+' · '+w.time+' · '+w.type+'</button>';
+    }).join('');
+  }
+
+  function base(){
+    return { responsive:true, maintainAspectRatio:false, animation:false,
+      plugins:{ legend:{ labels:{ color:v('--ink-2'), boxWidth:10, boxHeight:10, font:{ family:'IBM Plex Sans', size:12 } } },
+                tooltip:{ backgroundColor:v('--ink'), titleColor:v('--paper'), bodyColor:v('--paper'), titleFont:{ family:'IBM Plex Sans' }, bodyFont:{ family:'IBM Plex Mono', size:12 } } },
+      scales:{ x:{ ticks:{ color:v('--ink-3'), font:{ family:'IBM Plex Mono', size:11 } }, grid:{ color:v('--line') } },
+               y:{ ticks:{ color:v('--ink-3'), font:{ family:'IBM Plex Mono', size:11 } }, grid:{ color:v('--line') }, beginAtZero:true } } };
+  }
+
+  var markers = { id:'markers', afterDatasetsDraw:function(c){
+    var x = c.scales.x, a = c.chartArea, ctx = c.ctx; if (!x) return;
+    [0,15,30,45].forEach(function(m){
+      var px = x.getPixelForValue(m); if (px < a.left || px > a.right) return;
+      ctx.save(); ctx.strokeStyle = m === 0 ? v('--ink-2') : v('--ink-3'); ctx.setLineDash(m === 0 ? [] : [3,4]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+      ctx.fillStyle = v('--ink-3'); ctx.font = '11px IBM Plex Mono'; ctx.fillText(m === 0 ? 'start' : '+' + m, px + 4, a.top + 12); ctx.restore();
+    });
+  }};
+
+  function renderCurve(R){
+    var ds = state.picked.map(function(id, i){
+      var w = R.find(function(x){ return x.id === id; }), c = curve(w);
+      return { label: dshort(w.date) + ' ' + w.time + ' · ' + w.type, data: c.map(function(y,j){ return { x: w.curve.start + j, y: y }; }),
+               borderColor: v(COLORS[i]), backgroundColor: v(COLORS[i]), borderWidth: 2, pointRadius: 0, tension: .25 };
+    });
+    var o = base(); o.parsing = false; o.interaction = { mode:'nearest', axis:'x', intersect:false };
+    o.scales.x.type = 'linear'; o.scales.x.min = -30; o.scales.x.ticks.stepSize = 15; o.scales.x.title = { display:true, text:'minutes from scheduled start', color:v('--ink-3') };
+    o.scales.y.title = { display:true, text:'people in the room', color:v('--ink-3') };
+    o.plugins.tooltip.callbacks = { title:function(it){ var m = it[0].parsed.x; return (m >= 0 ? '+' : '') + m + ' min'; } };
+    if (charts.curve) charts.curve.destroy();
+    charts.curve = new Chart(document.getElementById('c-curve'), { type:'line', data:{ datasets: ds }, options:o, plugins:[markers] });
+  }
+
+  function renderDaily(R){
+    var by = {}; R.forEach(function(w){ by[w.date] = by[w.date] || { q:0, o:0 }; by[w.date].q += w.uniques.Qualified; by[w.date].o += w.uniques.Other; });
+    var days = Object.keys(by).sort();
+    var show = function(s){ return state.seg === 'all' || state.seg === s; };
+    var ds = [];
+    if (show('Qualified')) ds.push({ label:'Qualified', data: days.map(function(d){ return by[d].q; }), backgroundColor: v('--s1'), borderRadius: 3 });
+    if (show('Other')) ds.push({ label:'Other', data: days.map(function(d){ return by[d].o; }), backgroundColor: v('--line'), borderRadius: 3 });
+    var o = base(); o.scales.x.stacked = true; o.scales.y.stacked = true; o.scales.x.grid = { display:false };
+    if (charts.daily) charts.daily.destroy();
+    charts.daily = new Chart(document.getElementById('c-daily'), { type:'bar', data:{ labels: days.map(dshort), datasets: ds }, options:o });
+  }
+
+  function renderRet(R){
+    var pts = ['15','30','45'];
+    var line = function(seg, color){ return { label: seg, data: [100].concat(pts.map(function(p){ return avg(R.map(function(w){ return w[seg].retention[p]; })); })),
+      borderColor: color, backgroundColor: color, borderWidth: 2.5, pointRadius: 4, tension: .2 }; };
+    var o = base(); o.scales.y.max = 100; o.scales.y.min = 0;
+    o.scales.y.ticks.callback = function(x){ return x + '%'; };
+    o.plugins.tooltip.callbacks = { label:function(c){ return c.dataset.label + ': ' + c.parsed.y.toFixed(1) + '% of peak'; } };
+    if (charts.ret) charts.ret.destroy();
+    charts.ret = new Chart(document.getElementById('c-ret'), { type:'line', data:{ labels:['peak','+15','+30','+45'], datasets:[ line('Qualified', v('--s1')), line('Other', v('--s2')) ] }, options:o });
+  }
+
+  function renderTable(R){
+    var rec = R.map(function(w){ var s = S(w); return { w:w, date:w.date+w.time, title:w.title, type:w.type, uniq:uniq(w), peak:s.peak, pm:s.peak_minute,
+      r15:s.retention['15'], r30:s.retention['30'], r45:s.retention['45'], watch:w.avg_watch_min }; });
+    rec.sort(function(a,b){ var x = a[state.sortK], y = b[state.sortK]; return (x > y ? 1 : x < y ? -1 : 0) * state.sortDir; });
+    var maxU = Math.max.apply(null, rec.map(function(r){ return r.uniq; }).concat([1]));
+    document.querySelector('#tbl tbody').innerHTML = rec.map(function(r){
+      return '<tr data-id="'+r.w.id+'" class="'+(state.picked.indexOf(r.w.id) >= 0 ? 'on' : '')+'"><td>'+dshort(r.w.date)+' · '+r.w.time+'</td><td>'+r.title+'</td><td><span class="pill">'+r.type+'</span></td>'+
+        '<td class="num">'+fmt(r.uniq)+'<span class="bar" style="width:'+Math.round(40*r.uniq/maxU)+'px"></span></td><td class="num">'+fmt(r.peak)+'</td><td class="num">'+(r.pm == null ? '–' : '+'+r.pm+' min')+'</td>'+
+        '<td class="num">'+pct(r.r15)+'</td><td class="num">'+pct(r.r30)+'</td><td class="num">'+pct(r.r45)+'</td><td class="num">'+r.watch+' min</td></tr>';
+    }).join('');
+    var a = function(k){ return avg(rec.map(function(r){ return r[k]; })); };
+    document.querySelector('#tbl tfoot').innerHTML = '<tr><td>Average</td><td>'+rec.length+' webinars</td><td></td><td class="num">'+fmt(a('uniq'))+'</td><td class="num">'+fmt(a('peak'))+'</td><td class="num">+'+fmt(a('pm'))+' min</td><td class="num">'+pct(a('r15'))+'</td><td class="num">'+pct(a('r30'))+'</td><td class="num">'+pct(a('r45'))+'</td><td class="num">'+(a('watch')||0).toFixed(1)+' min</td></tr>';
+    document.querySelectorAll('#tbl th').forEach(function(th){
+      if (th.dataset.k === state.sortK) th.setAttribute('aria-sort', state.sortDir > 0 ? 'ascending' : 'descending'); else th.removeAttribute('aria-sort');
+    });
+  }
+
+  function renderChecks(){
+    var c = D.checks;
+    var items = [[c.raw_rows,'raw join/leave rows read'],[c.attendees,'unique attendees after merging'],[c.rows_collapsed,'rejoin and second-device rows collapsed'],[c.webinars,'webinars in the 45-day window']];
+    document.getElementById('checks').innerHTML = items.map(function(x){ return '<div><b>'+x[0].toLocaleString('en-IN')+'</b><span>'+x[1]+'</span></div>'; }).join('');
+  }
+
+  function render(){
+    var R = rows();
+    document.getElementById('m-window').textContent = 'Showing last ' + state.days + ' days · ' + (state.type === 'all' ? 'all types' : state.type) + ' · ' + (state.seg === 'all' ? 'everyone' : state.seg);
+    renderKpis(R); renderChips(R); renderCurve(R); renderDaily(R); renderRet(R); renderTable(R);
+  }
+
+  function bindSeg(id, key, cast){
+    document.getElementById(id).addEventListener('click', function(e){
+      var b = e.target.closest('button'); if (!b) return;
+      this.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); });
+      state[key] = cast ? +b.dataset.v : b.dataset.v; render();
+    });
+  }
+  bindSeg('f-type','type'); bindSeg('f-seg','seg'); bindSeg('f-days','days',true);
+
+  function toggle(id){
+    var i = state.picked.indexOf(id);
+    if (i >= 0) { if (state.picked.length > 1) state.picked.splice(i,1); }
+    else if (state.picked.length < 6) state.picked.push(id);
+    var R = rows(); renderChips(R); renderCurve(R); renderTable(R);
+  }
+  document.getElementById('chips').addEventListener('click', function(e){ var b = e.target.closest('.chip'); if (b && !b.disabled) toggle(b.dataset.id); });
+  document.querySelector('#tbl tbody').addEventListener('click', function(e){ var tr = e.target.closest('tr'); if (tr) toggle(tr.dataset.id); });
+  document.querySelector('#tbl thead').addEventListener('click', function(e){
+    var th = e.target.closest('th'); if (!th) return;
+    if (state.sortK === th.dataset.k) state.sortDir *= -1; else { state.sortK = th.dataset.k; state.sortDir = -1; }
+    renderTable(rows());
+  });
+
+  renderChecks(); render();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);   // canvas text needs the web font loaded
+  if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(){ css = getComputedStyle(document.documentElement); render(); });
+})();
+</script>
+</body>
+</html>
