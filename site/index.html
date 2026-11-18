@@ -42,6 +42,13 @@ header.top{padding:40px 0 22px}
 h1{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,4.6vw,48px);line-height:1.05;letter-spacing:-.02em;margin:8px 0 10px}
 .lede{color:var(--ink-2);max-width:68ch;margin:0}
 .meta{margin-top:14px;font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:6px 18px}
+.exec{border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));background:color-mix(in srgb,var(--accent) 5%,var(--sheet));border-radius:14px;padding:18px 20px;margin:0 0 18px}
+.exec .lbl{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.exec h2{font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1.25;margin:6px 0 10px}
+.exec ul{margin:0 0 12px;padding-left:18px;color:var(--ink-2)} .exec li{margin-bottom:4px}
+.exec .rec{display:flex;gap:10px;align-items:flex-start;background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14.5px}
+.exec .rec b{color:var(--accent);flex:none}
+.limits ul{margin:0;padding-left:18px;color:var(--ink-2)} .limits li{margin-bottom:6px}
 .controls{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;padding:14px 0 18px;border-top:1px solid var(--line)}
 .ctl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--sheet)}
@@ -109,6 +116,8 @@ footer{color:var(--ink-3);font-size:13px;padding:22px 0 40px;display:flex;flex-w
 </div></header>
 
 <main class="wrap">
+  <section class="exec" id="exec" aria-label="Executive summary"></section>
+
   <div class="controls">
     <div class="ctl">Type
       <div class="seg" id="f-type"><button data-v="all" aria-pressed="true">All</button><button data-v="Regular" aria-pressed="false">Regular</button><button data-v="Masterclass" aria-pressed="false">Masterclass</button></div>
@@ -154,6 +163,16 @@ footer{color:var(--ink-3);font-size:13px;padding:22px 0 40px;display:flex;flex-w
       </tr></thead>
       <tbody></tbody><tfoot></tfoot>
     </table></div>
+  </section>
+
+  <section class="card limits">
+    <h2>Limitations, and what I'd do next</h2>
+    <ul>
+      <li><b>Leaving isn't always losing interest.</b> Some people leave because they've decided to buy, or join late from a replay link. Next: join each attendee's leave minute to whether they bought, so the drop is split into "lost" and "done".</li>
+      <li><b>Correlation, not cause.</b> The drop lines up with a point in the session, but the console can't say what's said there. That's why the recommendation is an A/B test across alternate sessions, not a script change.</li>
+      <li><b>Minute resolution.</b> Anyone present for part of a minute counts for that minute. Fine for 15-minute windows; too coarse for second-by-second edits.</li>
+      <li><b>"Qualified" is set at registration</b> and doesn't change with what happens in the session. A better segment would add in-session signals: questions asked, polls answered.</li>
+    </ul>
   </section>
 
   <section class="card how" id="how">
@@ -352,6 +371,11 @@ footer{color:var(--ink-3);font-size:13px;padding:22px 0 40px;display:flex;flex-w
     renderTable(rows());
   });
 
+  if (D.summary) {
+    var X = D.summary;
+    document.getElementById('exec').innerHTML = '<div class="lbl">Executive summary · computed from today\'s data</div><h2>' + X.headline + '</h2><ul>' +
+      X.points.map(function(p){ return '<li>' + p + '</li>'; }).join('') + '</ul><div class="rec"><b>Recommendation</b><span>' + X.recommendation + '</span></div>';
+  }
   renderChecks(); render();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);   // canvas text needs the web font loaded
   if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(){ css = getComputedStyle(document.documentElement); render(); });

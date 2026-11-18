@@ -4,7 +4,7 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "pipeline"))
-from transform import merge_sessions, minute_grid  # noqa: E402
+from transform import mean_ci, merge_sessions, minute_grid, paired_p  # noqa: E402
 
 
 class MergeSessions(unittest.TestCase):
@@ -29,6 +29,18 @@ class MinuteGrid(unittest.TestCase):
 
     def test_clipped_to_window(self):
         self.assertEqual(minute_grid([[-40, -28]], -30, 100), {-30, -29})
+
+
+class Stats(unittest.TestCase):
+    def test_mean_ci_brackets_the_mean(self):
+        m, lo, hi = mean_ci([10, 12, 14, 16, 18] * 8)
+        self.assertAlmostEqual(m, 14); self.assertTrue(lo < 14 < hi)
+
+    def test_no_difference_is_not_significant(self):
+        self.assertGreater(paired_p([1, -1, 2, -2, 0.5, -0.5] * 6), 0.5)
+
+    def test_consistent_gap_is_significant(self):
+        self.assertLess(paired_p([24, 26, 25, 27, 23, 25] * 6), 0.001)
 
 
 if __name__ == "__main__":

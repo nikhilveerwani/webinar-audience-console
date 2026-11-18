@@ -14,6 +14,15 @@
 
 > **Demo with synthetic data.** I built and run the production version of this console on company data I can't share. This repo is a clean-room rebuild: fresh code, made-up webinars and attendees, and the same analytical rules. Every number you see here is synthetic.
 
+## Executive summary
+
+- **The room loses most people in one 15-minute window (about minute 34–49): around 30 points of the peak.**
+- **Qualified attendees stay longer:** about 70% vs 44% of peak at +45, a 26-point gap (95% CI 23–29, paired across 43 webinars, p < 0.001).
+- **But qualified people's steepest drop is in the same window**, so it isn't just the wrong audience leaving. Something in the session at that point loses everyone.
+- **Recommendation:** move the offer and the main Q&A before the drop in alternate sessions for 4 weeks, and judge on qualified retention *and* attendee sales. Full reasoning in the **[decision memo](docs/decision_memo.md)**.
+
+*The live page recomputes this summary from each morning's data.*
+
 ## The problem
 
 A team runs a webinar almost every day and treats it as its main top-of-funnel event. Attendance alone tells them very little. The questions that matter are:
@@ -61,6 +70,23 @@ flowchart LR
 - **Timestamps are converted from UTC to IST once, in the transform**, never in the page.
 
 The tricky parts (overlapping devices, sub-minute rejoins, clipping to the window) are covered by unit tests in `tests/`.
+
+## Statistical checks
+
+- **Qualified vs Other** is a *paired* comparison: the gap is measured inside each webinar, then averaged with a 95% interval. That removes session-to-session differences (topic, day, audience size) from the comparison.
+- **The drop window** is found on curves normalised to each webinar's own peak before averaging, so one big Masterclass can't set the pattern.
+
+## Limitations, and what I'd do next
+
+- **Leaving isn't always losing.** Some leave because they've decided to buy. Next: join each attendee's leave minute to purchases to split "lost" from "done".
+- **Correlation, not cause.** The drop lines up with a point in the session; only an A/B test shows what fixes it.
+- **Minute resolution** is right for 15-minute windows, too coarse for second-level edits.
+- **"Qualified" is fixed at registration.** In-session signals (questions, polls) would make a better segment.
+
+## Documents
+
+- **[Decision memo](docs/decision_memo.md):** the decision, evidence, options, recommendation, and what would change it
+- **[Data dictionary](docs/data_dictionary.md):** every column, metric definition and statistical check
 
 ## Run it locally
 
